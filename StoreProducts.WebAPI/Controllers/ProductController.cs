@@ -27,10 +27,19 @@ namespace StoreProducts.WebAPI.Controllers
         [HttpPost]
         public IActionResult CreateProduct([FromBody]ProductDTO product)
         {
+
             try
             {
-                productService.Add(product);
-                return Ok();
+                if (ModelState.IsValid)
+                {
+                    productService.Add(product);
+                    return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
             }
             catch (Exception ex)
             {
@@ -42,21 +51,38 @@ namespace StoreProducts.WebAPI.Controllers
         {
             try
             {
-                productService.Delete(id);
-                return Ok();
+                var product = productService.GetById(id);
+                if(product != null)
+                {
+                    productService.Delete(id);
+                    return NoContent();
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPatch]
+        [HttpPut]
         public IActionResult Update([FromBody]ProductDTO product)
         {
             try
             {
-                productService.Update(product);
-                return Ok();
+                var putProduct = productService.GetById(product.Id);
+                if (putProduct != null)
+                {
+                    productService.Update(product);
+                    return NoContent();
+                }
+                else
+                {
+                    return NotFound();
+                }
+
             }
             catch (Exception ex)
             {
